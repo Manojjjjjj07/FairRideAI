@@ -16,6 +16,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import mapped_column
+# pyrefly: ignore [missing-import]
+from sqlalchemy.orm import relationship
+# pyrefly: ignore [missing-import]
+from sqlalchemy import Float
+# pyrefly: ignore [missing-import]
+from sqlalchemy import Text
+# pyrefly: ignore [missing-import]
+from sqlalchemy import DateTime
 
 from app.db.base import Base
 from app.db.mixins import UUIDMixin
@@ -88,4 +96,15 @@ class Incident(
     status: Mapped[str] = mapped_column(
         String(20),
         default="OPEN"
+    )
+
+    user = relationship(
+        "User",
+        back_populates="incidents"
+    )
+
+    evidences = relationship(
+        "Evidence",
+        back_populates="incident",
+        cascade="all, delete-orphan"
     )
