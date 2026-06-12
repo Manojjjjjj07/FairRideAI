@@ -1,10 +1,17 @@
 import uuid
 # pyrefly: ignore [missing-import]
+from sqlalchemy import Float
+# pyrefly: ignore [missing-import]
 from sqlalchemy import ForeignKey
 # pyrefly: ignore [missing-import]
 from sqlalchemy import String
 # pyrefly: ignore [missing-import]
+from sqlalchemy import Text
+# pyrefly: ignore [missing-import]
+from sqlalchemy import DateTime
+# pyrefly: ignore [missing-import]
 from sqlalchemy.dialects.postgresql import UUID
+
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Mapped
 # pyrefly: ignore [missing-import]
@@ -24,7 +31,8 @@ class Incident(
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("users.id")
+        ForeignKey("users.id"),
+        nullable=False
     )
 
     incident_type: Mapped[str] = mapped_column(
@@ -35,4 +43,49 @@ class Incident(
     severity: Mapped[str] = mapped_column(
         String(20),
         nullable=False
+    )
+
+    description: Mapped[str] = mapped_column(
+        Text,
+        nullable=False
+    )
+
+    platform: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False
+    )
+
+    captain_name: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
+    )
+
+    captain_phone: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True
+    )
+
+    app_fare: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True
+    )
+
+    demanded_fare: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True
+    )
+
+    incident_datetime: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False
+    )
+
+    location: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(20),
+        default="OPEN"
     )

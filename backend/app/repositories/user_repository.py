@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-
+import uuid
 
 class UserRepository:
 
@@ -29,3 +29,15 @@ class UserRepository:
         db.refresh(user)
 
         return user
+    
+    @staticmethod
+    def get_by_id(
+        db: Session,
+        user_id: uuid.UUID
+    ) -> User | None:
+
+        return (
+            db.query(User)
+            .filter(User.id == user_id)
+            .first()
+        )
