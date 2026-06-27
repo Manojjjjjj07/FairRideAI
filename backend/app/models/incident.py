@@ -18,13 +18,6 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
-# pyrefly: ignore [missing-import]
-from sqlalchemy import Float
-# pyrefly: ignore [missing-import]
-from sqlalchemy import Text
-# pyrefly: ignore [missing-import]
-from sqlalchemy import DateTime
-
 from app.db.base import Base
 from app.db.mixins import UUIDMixin
 from app.db.mixins import TimestampMixin

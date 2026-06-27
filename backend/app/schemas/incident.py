@@ -1,5 +1,4 @@
 from datetime import datetime
-
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel
 
@@ -7,6 +6,7 @@ from pydantic import BaseModel
 class IncidentCreateRequest(BaseModel):
 
     incident_type: str
+
     severity: str
 
     description: str
@@ -14,9 +14,11 @@ class IncidentCreateRequest(BaseModel):
     platform: str
 
     captain_name: str | None = None
+
     captain_phone: str | None = None
 
     app_fare: float | None = None
+
     demanded_fare: float | None = None
 
     incident_datetime: datetime
@@ -31,5 +33,11 @@ class IncidentResponse(BaseModel):
     incident_type: str
 
     severity: str
+
+    description: str
+
+    platform: str
+
+    location: str
 
     status: str
