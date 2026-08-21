@@ -22,10 +22,19 @@ from app.services.incident_service import (
     IncidentService
 )
 
+from app.repositories.incident_repository import (
+    IncidentRepository
+)
+
+from app.repositories.evidence_repository import (
+    EvidenceRepository
+)
+
 router = APIRouter(
     prefix="/incidents",
     tags=["Incidents"]
 )
+
 
 # Create Incident Endpoint
 @router.post("/")
@@ -49,7 +58,8 @@ def create_incident(
         "message": "Incident created successfully"
     }
 
-# Get User Endpoints
+
+# Get User Incidents
 @router.get("/")
 def get_my_incidents(
     db: Session = Depends(get_db),
@@ -73,3 +83,100 @@ def get_my_incidents(
         }
         for i in incidents
     ]
+
+
+# Get Incident Details
+@router.get("/{incident_id}")
+def get_incident_details(
+    incident_id: uuid.UUID,
+
+    db: Session = Depends(get_db),
+
+    current_user=Depends(
+        get_current_user
+    )
+):
+
+    incident = (
+        IncidentRepository.get_by_id(
+            db,
+            incident_id
+        )
+    )
+
+    if not incident:
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found"
+        )
+
+    if incident.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
+    evidences = (
+        EvidenceRepository.get_by_incident(
+            db,
+            incident_id
+        )
+    )
+
+    return {
+        "id": str(incident.id),
+
+        "incident_type":
+            incident.incident_type,
+
+        "severity":
+            incident.severity,
+
+        "description":
+            incident.description,
+
+        "platform":
+            incident.platform,
+
+        "captain_name":
+            incident.captain_name,
+
+        "captain_phone":
+            incident.captain_phone,
+
+        "app_fare":
+            incident.app_fare,
+
+        "demanded_fare":
+            incident.demanded_fare,
+
+        "incident_datetime":
+            incident.incident_datetime,
+
+        "location":
+            incident.location,
+
+        "status":
+            incident.status,
+
+        "created_at":
+            incident.created_at,
+
+        "evidences": [
+
+            {
+                "id": str(e.id),
+
+                "evidence_type":
+                    e.evidence_type,
+
+                "file_path":
+                    e.file_path,
+
+                "created_at":
+                    e.created_at
+            }
+
+            for e in evidences
+        ]
+    }

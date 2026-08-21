@@ -14,6 +14,9 @@ from app.schemas.incident import (
     IncidentCreateRequest
 )
 
+from app.repositories.evidence_repository import (
+    EvidenceRepository
+)
 
 class IncidentService:
 
@@ -75,4 +78,32 @@ class IncidentService:
         return IncidentRepository.get_by_user(
             db,
             user_id
+        )
+    
+    @staticmethod
+    def get_incident_details(
+        db,
+        incident_id
+    ):
+
+        incident = (
+            IncidentRepository.get_by_id(
+                db,
+                incident_id
+            )
+        )
+
+        if not incident:
+            return None
+
+        evidences = (
+            EvidenceRepository.get_by_incident(
+                db,
+                incident_id
+            )
+        )
+
+        return (
+            incident,
+            evidences
         )
