@@ -1,0 +1,231 @@
+import Link from 'next/link';
+import { 
+  ChevronLeft, 
+  ShieldCheck, 
+  FileText, 
+  CreditCard, 
+  Mic, 
+  MessageSquare, 
+  Calendar, 
+  MapPin, 
+  User, 
+  Phone, 
+  IndianRupee, 
+  Sparkles, 
+  Plus, 
+  ArrowRight, 
+  AlertTriangle,
+  ExternalLink,
+  ShieldAlert
+} from 'lucide-react';
+import Navbar from '@/components/layout/Navbar';
+import GlassCard from '@/components/ui/GlassCard';
+import Badge from '@/components/ui/Badge';
+import type { BadgeVariant } from '@/components/ui/Badge';
+
+/* ── Mock incident data ── */
+const mockIncident = {
+  id:              '1',
+  incident_type:   'Fare Extortion',
+  severity:        'high'     as BadgeVariant,
+  platform:        'Rapido',
+  status:          'open'     as BadgeVariant,
+  location:        'Koramangala, Bengaluru',
+  captain_name:    'Ravi Kumar',
+  captain_phone:   '+91 98765 43210',
+  app_fare:        120,
+  demanded_fare:   350,
+  description:
+    'After completing the ride from Indiranagar to Koramangala, the captain locked the vehicle doors and refused to end the trip unless I paid ₹350 in cash. The app showed ₹120. He claimed the platform fare "never covers fuel" and threatened to stall in the middle of the road. I was forced to pay to ensure my personal safety.',
+  incident_datetime: '2026-08-20T18:30:00',
+  created_at:        '2026-08-20',
+  evidences: [
+    { id: 'e1', evidence_type: 'SCREENSHOT',    file_path: 'uploads/screenshots/ride-fare-app.png', created_at: '2026-08-20', icon: FileText },
+    { id: 'e2', evidence_type: 'PAYMENT_PROOF', file_path: 'uploads/payment_proofs/upi-receipt.png', created_at: '2026-08-20', icon: CreditCard },
+    { id: 'e3', evidence_type: 'AUDIO',         file_path: 'uploads/audio/captain-confrontation.m4a', created_at: '2026-08-20', icon: Mic },
+  ],
+};
+
+function formatDatetime(iso: string) {
+  return new Date(iso).toLocaleString('en-IN', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone: 'Asia/Kolkata',
+  });
+}
+
+/* ── Overcharge Comparison Banner ── */
+function FareComparison({ app, demanded }: { app: number; demanded: number }) {
+  const diff = demanded - app;
+  const pct  = ((diff / app) * 100).toFixed(0);
+
+  return (
+    <GlassCard className="border-red-500/30 bg-red-500/5">
+      <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wider mb-4">
+        <AlertTriangle className="w-4 h-4 text-red-400" />
+        <span>Fare Discrepancy Breakdown</span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 items-center">
+        {/* App fare */}
+        <div className="text-center p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+          <p className="text-xs text-slate-400 font-medium mb-1">Official App Fare</p>
+          <p className="text-2xl font-black text-slate-100">₹{app}</p>
+        </div>
+
+        {/* Arrow + overcharge */}
+        <div className="text-center flex flex-col items-center">
+          <ArrowRight className="w-6 h-6 text-red-400 mb-1" />
+          <p className="text-sm font-extrabold text-red-400">+₹{diff}</p>
+          <p className="text-[10px] font-bold text-red-300 bg-red-500/20 px-2 py-0.5 rounded-full mt-1">
+            +{pct}% OVERCHARGE
+          </p>
+        </div>
+
+        {/* Demanded fare */}
+        <div className="text-center p-4 rounded-xl bg-red-500/15 border border-red-500/30 shadow-lg shadow-red-500/10">
+          <p className="text-xs text-red-300 font-medium mb-1">Cash Demanded</p>
+          <p className="text-2xl font-black text-red-200">₹{demanded}</p>
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
+
+function InfoRow({ label, value, icon: Icon }: { label: string; value: string; icon?: any }) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-slate-800/80 last:border-0 text-xs">
+      <span className="text-slate-400 font-medium flex items-center gap-2">
+        {Icon && <Icon className="w-3.5 h-3.5 text-slate-500" />}
+        {label}
+      </span>
+      <span className="text-slate-200 font-semibold">{value}</span>
+    </div>
+  );
+}
+
+export default function IncidentDetailPage() {
+  const inc = mockIncident;
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#070a14]">
+      <Navbar />
+
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 pb-24">
+
+        {/* Back Link */}
+        <Link href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors mb-6">
+          <ChevronLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+
+        {/* Header Summary Card */}
+        <GlassCard className="mb-6 border-t border-slate-700/60">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant={inc.severity}>{inc.severity} severity</Badge>
+                <Badge variant={inc.status}>{inc.status}</Badge>
+                <span className="text-xs text-slate-400 font-semibold">• {inc.platform}</span>
+              </div>
+              <h1 className="text-2xl font-extrabold text-white">{inc.incident_type}</h1>
+            </div>
+
+            <Link href="/incidents/new"
+              className="inline-flex items-center gap-1.5 text-xs font-bold bg-blue-600/20 text-cyan-300 border border-blue-500/40 px-3.5 py-2 rounded-xl hover:bg-blue-600/30 transition-all shrink-0">
+              <Plus className="w-4 h-4" />
+              <span>Add Proof</span>
+            </Link>
+          </div>
+
+          <div className="pt-2">
+            <InfoRow label="Location" value={inc.location} icon={MapPin} />
+            <InfoRow label="Incident Time" value={formatDatetime(inc.incident_datetime)} icon={Calendar} />
+            <InfoRow label="Case File Created" value={new Date(inc.created_at).toLocaleDateString('en-IN', { dateStyle: 'long' })} icon={ClockIcon} />
+          </div>
+        </GlassCard>
+
+        {/* Fare Discrepancy Card */}
+        {inc.app_fare && inc.demanded_fare && (
+          <div className="mb-6">
+            <FareComparison app={inc.app_fare} demanded={inc.demanded_fare} />
+          </div>
+        )}
+
+        {/* Captain Information */}
+        {(inc.captain_name || inc.captain_phone) && (
+          <GlassCard className="mb-6">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Captain Information
+            </h3>
+            {inc.captain_name  && <InfoRow label="Captain Name" value={inc.captain_name} icon={User} />}
+            {inc.captain_phone && <InfoRow label="Phone / Vehicle No." value={inc.captain_phone} icon={Phone} />}
+          </GlassCard>
+        )}
+
+        {/* Description */}
+        <GlassCard className="mb-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+            Incident Description
+          </h3>
+          <p className="text-sm text-slate-300 leading-relaxed font-normal bg-slate-950/40 p-4 rounded-xl border border-slate-800/60">
+            {inc.description}
+          </p>
+        </GlassCard>
+
+        {/* Evidence Grid */}
+        <GlassCard className="mb-6">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+            Attached Evidence ({inc.evidences.length} files)
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {inc.evidences.map((ev) => {
+              const Icon = ev.icon;
+              return (
+                <div key={ev.id} className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white truncate">{ev.evidence_type}</p>
+                    <p className="text-[10px] text-slate-500 truncate mt-0.5">{ev.file_path.split('/').pop()}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </GlassCard>
+
+        {/* AI Protection Engine Status */}
+        <GlassCard className="border-purple-500/30 bg-purple-500/5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 flex items-center justify-center">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">AI Protection Engine</p>
+              <span className="text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Multi-Modal Analysis Ready
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Our multi-modal AI engine analyzes your uploaded app screenshots, payment receipts, and audio clips together to verify fare discrepancies and generate consumer court dispute complaints.
+          </p>
+        </GlassCard>
+
+      </main>
+    </div>
+  );
+}
+
+function ClockIcon(props: any) {
+  return (
+    <svg {...props} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
