@@ -96,6 +96,8 @@ export interface IncidentListItem {
   severity: string;
   status: string;
   platform: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface EvidenceItem {
@@ -117,6 +119,8 @@ export interface IncidentDetail {
   demanded_fare: number | null;
   incident_datetime: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   status: string;
   created_at: string;
   evidences: EvidenceItem[];
@@ -133,6 +137,8 @@ export interface IncidentCreatePayload {
   demanded_fare?: number;
   incident_datetime: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface IncidentCreateResponse {

@@ -25,6 +25,10 @@ class IncidentCreateRequest(BaseModel):
 
     location: str
 
+    latitude: float | None = None
+
+    longitude: float | None = None
+
 
 class IncidentResponse(BaseModel):
 
@@ -39,5 +43,9 @@ class IncidentResponse(BaseModel):
     platform: str
 
     location: str
+
+    latitude: float | None = None
+
+    longitude: float | None = None
 
     status: str

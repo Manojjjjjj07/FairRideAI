@@ -31,6 +31,7 @@ import Navbar from '@/components/layout/Navbar';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import GlassCard from '@/components/ui/GlassCard';
+import LocationPicker from '@/components/ui/LocationPicker';
 import { createIncident, uploadEvidence, ApiError } from '@/lib/api';
 
 /* ── Form Data Type ── */
@@ -40,6 +41,8 @@ type FormData = {
   platform:           string;
   incident_datetime:  string;
   location:           string;
+  latitude:           number | null;
+  longitude:          number | null;
   captain_name:       string;
   captain_phone:      string;
   app_fare:           string;
@@ -182,6 +185,8 @@ export default function NewIncidentPage() {
     platform:          '',
     incident_datetime: '',
     location:          '',
+    latitude:          null,
+    longitude:         null,
     captain_name:      '',
     captain_phone:     '',
     app_fare:          '',
@@ -241,6 +246,8 @@ export default function NewIncidentPage() {
           ? new Date(form.incident_datetime).toISOString()
           : new Date().toISOString(),
         location:          form.location,
+        latitude:          form.latitude ?? undefined,
+        longitude:         form.longitude ?? undefined,
       };
       const { id } = await createIncident(payload);
       setCreatedId(id);
@@ -391,16 +398,17 @@ export default function NewIncidentPage() {
                 required
               />
 
-              <Input
-                label="Pickup / Drop Location"
-                id="incident-location"
-                type="text"
-                placeholder="e.g. Koramangala, Bengaluru"
-                value={form.location}
-                onChange={set('location')}
-                icon={<MapPin className="w-4 h-4 text-slate-400" />}
-                required
-              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-slate-300">
+                  Pickup / Drop Location <span className="text-red-400">*</span>
+                </label>
+                <LocationPicker
+                  value={form.location}
+                  onChange={(address, lat, lng) =>
+                    setForm((f) => ({ ...f, location: address, latitude: lat, longitude: lng }))
+                  }
+                />
+              </div>
             </div>
           )}
 

@@ -86,6 +86,16 @@ class Incident(
         nullable=False
     )
 
+    latitude: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True
+    )
+
+    longitude: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True
+    )
+
     status: Mapped[str] = mapped_column(
         String(20),
         default="OPEN"

@@ -50,6 +50,10 @@ class IncidentService:
 
             location=payload.location,
 
+            latitude=payload.latitude,
+
+            longitude=payload.longitude,
+
             status="OPEN"
         )
 

@@ -79,7 +79,9 @@ def get_my_incidents(
             "incident_type": i.incident_type,
             "severity": i.severity,
             "status": i.status,
-            "platform": i.platform
+            "platform": i.platform,
+            "latitude": i.latitude,
+            "longitude": i.longitude
         }
         for i in incidents
     ]
@@ -155,6 +157,12 @@ def get_incident_details(
 
         "location":
             incident.location,
+
+        "latitude":
+            incident.latitude,
+
+        "longitude":
+            incident.longitude,
 
         "status":
             incident.status,
