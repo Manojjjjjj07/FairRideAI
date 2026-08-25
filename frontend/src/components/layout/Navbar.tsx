@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Shield, Menu, LogOut, LayoutDashboard, FilePlus, Sparkles } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Shield, Menu, LogOut, LayoutDashboard, FilePlus } from 'lucide-react';
 import MobileDrawer from './MobileDrawer';
+import { getStoredUser, clearToken, type UserResponse } from '@/lib/api';
 
 export const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -13,7 +14,18 @@ export const navLinks = [
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [user, setUser] = useState<UserResponse | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  function handleLogout() {
+    clearToken();
+    router.replace('/login');
+  }
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + '/');
@@ -61,19 +73,19 @@ export default function Navbar() {
             <div className="flex items-center gap-2.5 pl-3 border-l border-slate-800">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 p-[1px]">
                 <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-xs font-bold text-cyan-300">
-                  M
+                  {user?.name?.[0]?.toUpperCase() ?? '?'}
                 </div>
               </div>
-              <span className="text-xs font-semibold text-slate-300">Manoj S.K</span>
+              <span className="text-xs font-semibold text-slate-300">{user?.name ?? 'Account'}</span>
             </div>
 
-            <Link
-              href="/login"
+            <button
+              onClick={handleLogout}
               className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
 
           {/* Mobile hamburger */}

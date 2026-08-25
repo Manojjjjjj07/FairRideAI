@@ -2,11 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Shield, ArrowLeft, Mail, Lock, AlertCircle, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Shield, ArrowLeft, Mail, Lock, AlertCircle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import { authLogin, getMe, setToken, setStoredUser, ApiError } from '@/lib/api';
+import { useRedirectIfAuth } from '@/lib/auth';
 
 export default function LoginPage() {
+  const router = useRouter();
+  useRedirectIfAuth();
+
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [loading,  setLoading]  = useState(false);
@@ -17,15 +23,31 @@ export default function LoginPage() {
     if (!email || !password) { setError('Please fill in all fields.'); return; }
     setLoading(true);
     setError('');
-    setTimeout(() => {
+
+    try {
+      // 1. Get JWT token
+      const { access_token } = await authLogin({ email, password });
+      setToken(access_token);
+
+      // 2. Fetch user profile and store it
+      const me = await getMe();
+      setStoredUser(me);
+
+      // 3. Navigate to dashboard
+      router.replace('/dashboard');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Unable to connect to server. Is the backend running?');
+      }
       setLoading(false);
-      window.location.href = '/dashboard';
-    }, 1100);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden bg-[#070a14]">
-      
+
       {/* Mesh glow orb */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
 
@@ -36,7 +58,7 @@ export default function LoginPage() {
       </Link>
 
       <div className="w-full max-w-[400px] relative z-10">
-        
+
         {/* Header Branding */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30 flex items-center justify-center mx-auto mb-4 glow-cyan">
@@ -79,8 +101,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3
-                              text-xs text-red-300 flex items-center gap-2 font-medium">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-xs text-red-300 flex items-center gap-2 font-medium">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </div>

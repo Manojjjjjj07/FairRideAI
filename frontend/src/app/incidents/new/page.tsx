@@ -2,33 +2,36 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Check, 
-  ChevronLeft, 
-  ChevronRight, 
-  ShieldCheck, 
-  AlertTriangle, 
-  Upload, 
-  Trash2, 
-  Image as ImageIcon, 
-  CreditCard, 
-  Mic, 
-  MessageSquare, 
-  FileText, 
-  Calendar, 
-  MapPin, 
-  User, 
-  Phone, 
-  IndianRupee, 
-  Zap, 
+import { useRouter } from 'next/navigation';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  AlertTriangle,
+  Upload,
+  Trash2,
+  Image as ImageIcon,
+  CreditCard,
+  Mic,
+  MessageSquare,
+  FileText,
+  Calendar,
+  MapPin,
+  User,
+  Phone,
+  IndianRupee,
+  Zap,
   Sparkles,
   ArrowRight,
-  FilePlus
+  FilePlus,
+  AlertCircle,
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import GlassCard from '@/components/ui/GlassCard';
+import { createIncident, uploadEvidence, ApiError } from '@/lib/api';
 
 /* ── Form Data Type ── */
 type FormData = {
@@ -163,10 +166,14 @@ function FareGap({ app, demanded }: { app: string; demanded: string }) {
 }
 
 export default function NewIncidentPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>([]);
+  const [fileObjects, setFileObjects] = useState<{ id: string; file: File; type: string }[]>([]);
   const [evidenceType, setEvidenceType] = useState('SCREENSHOT');
 
   const [form, setForm] = useState<FormData>({
@@ -204,19 +211,56 @@ export default function NewIncidentPage() {
       type: evidenceType,
       size: `${(f.size / 1024).toFixed(0)} KB`,
     }));
+    // Track the actual File objects for uploading
+    const objMapped = files.map((f, i) => ({ id: mapped[i].id, file: f, type: evidenceType }));
     setEvidenceFiles((prev) => [...prev, ...mapped]);
+    setFileObjects((prev) => [...prev, ...objMapped]);
     e.target.value = '';
   };
 
-  const removeFile = (id: string) =>
+  const removeFile = (id: string) => {
     setEvidenceFiles((prev) => prev.filter((f) => f.id !== id));
+    setFileObjects((prev) => prev.filter((f) => f.id !== id));
+  };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    setSubmitError('');
+    try {
+      // 1. Create the incident
+      const payload = {
+        incident_type:     form.incident_type,
+        severity:          form.severity,
+        description:       form.description,
+        platform:          form.platform,
+        captain_name:      form.captain_name || undefined,
+        captain_phone:     form.captain_phone || undefined,
+        app_fare:          form.app_fare     ? parseFloat(form.app_fare)     : undefined,
+        demanded_fare:     form.demanded_fare ? parseFloat(form.demanded_fare) : undefined,
+        incident_datetime: form.incident_datetime
+          ? new Date(form.incident_datetime).toISOString()
+          : new Date().toISOString(),
+        location:          form.location,
+      };
+      const { id } = await createIncident(payload);
+      setCreatedId(id);
+
+      // 2. Upload each evidence file
+      for (const item of fileObjects) {
+        await uploadEvidence(id, item.type, item.file);
+      }
+
       setSubmitted(true);
-    }, 1400);
+      // Redirect to the new incident's detail page after 2s
+      setTimeout(() => router.replace(`/incidents/${id}`), 2000);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setSubmitError(err.message);
+      } else {
+        setSubmitError('Failed to submit. Is the backend running?');
+      }
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -540,6 +584,14 @@ export default function NewIncidentPage() {
                 </div>
               )}
 
+            </div>
+          )}
+
+          {/* Submit error */}
+          {submitError && (
+            <div className="mt-6 flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-xs text-red-300 font-medium">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {submitError}
             </div>
           )}
 

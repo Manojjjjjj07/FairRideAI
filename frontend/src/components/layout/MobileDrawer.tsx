@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Shield, X, LogOut, LucideIcon } from 'lucide-react';
+import { getStoredUser, clearToken, type UserResponse } from '@/lib/api';
 
 interface NavLink {
   href:  string;
@@ -23,10 +25,23 @@ export default function MobileDrawer({
   currentPath,
   navLinks,
 }: MobileDrawerProps) {
+  const router = useRouter();
+  const [user, setUser] = useState<UserResponse | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, [isOpen]);
+
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  function handleLogout() {
+    clearToken();
+    onClose();
+    router.replace('/login');
+  }
 
   if (!isOpen) return null;
 
@@ -96,23 +111,22 @@ export default function MobileDrawer({
             <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 p-[1px]">
                 <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-sm font-bold text-cyan-300">
-                  M
+                  {user?.name?.[0]?.toUpperCase() ?? '?'}
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate">Manoj S.K</p>
-                <p className="text-xs text-slate-400 truncate">manoj@example.com</p>
+                <p className="text-sm font-semibold text-white truncate">{user?.name ?? 'Account'}</p>
+                <p className="text-xs text-slate-400 truncate">{user?.email ?? ''}</p>
               </div>
             </div>
 
-            <Link
-              href="/login"
-              onClick={onClose}
+            <button
+              onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors w-full"
             >
               <LogOut className="w-4 h-4" />
               Log out
-            </Link>
+            </button>
           </div>
 
         </div>

@@ -37,9 +37,12 @@ export default function Input({
         )}
         <input
           id={inputId}
-          className={`input-glass ${icon ? 'pl-10' : ''} ${error ? 'error' : ''} ${className}`}
+          className={`input-glass ${icon ? 'input-glass-has-icon !pl-11' : ''} ${error ? 'error' : ''} ${className}`}
+          style={icon ? { paddingLeft: '2.75rem' } : undefined}
           {...props}
         />
+
+
       </div>
 
       {error && (

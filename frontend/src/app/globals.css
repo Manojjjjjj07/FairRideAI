@@ -151,11 +151,18 @@ body::before {
   border-radius: 12px;
   color: #f8fafc;
   font-size: 0.95rem;
-  padding: 12px 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
   outline: none;
   transition: all 0.2s ease;
 }
+.input-glass-has-icon {
+  padding-left: 44px !important;
+}
 .input-glass::placeholder {
+
   color: rgba(148, 163, 184, 0.5);
 }
 .input-glass:hover:not(:focus) {

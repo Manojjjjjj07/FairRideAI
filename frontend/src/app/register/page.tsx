@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Shield, ArrowLeft, User, Mail, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import { authRegister, authLogin, getMe, setToken, setStoredUser, ApiError } from '@/lib/api';
+import { useRedirectIfAuth } from '@/lib/auth';
 
 const perks = [
   'Free lifetime account',
@@ -13,6 +16,9 @@ const perks = [
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
+  useRedirectIfAuth();
+
   const [name,     setName]     = useState('');
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
@@ -25,10 +31,29 @@ export default function RegisterPage() {
     if (password.length < 8)          { setError('Password must be at least 8 characters.'); return; }
     setLoading(true);
     setError('');
-    setTimeout(() => {
+
+    try {
+      // 1. Create account
+      await authRegister({ name, email, password });
+
+      // 2. Auto-login to get the token
+      const { access_token } = await authLogin({ email, password });
+      setToken(access_token);
+
+      // 3. Fetch and store user profile
+      const me = await getMe();
+      setStoredUser(me);
+
+      // 4. Navigate to dashboard
+      router.replace('/dashboard');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Unable to connect to server. Is the backend running?');
+      }
       setLoading(false);
-      window.location.href = '/dashboard';
-    }, 1200);
+    }
   };
 
   return (
@@ -103,8 +128,7 @@ export default function RegisterPage() {
             />
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3
-                              text-xs text-red-300 flex items-center gap-2 font-medium">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-xs text-red-300 flex items-center gap-2 font-medium">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
