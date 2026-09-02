@@ -107,6 +107,26 @@ export interface EvidenceItem {
   created_at: string;
 }
 
+export interface AIAnalysisData {
+  fare_verification: {
+    confirmed: boolean;
+    app_fare_from_evidence: number | null;
+    confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+    notes: string;
+  };
+  payment_verification: {
+    confirmed: boolean;
+    paid_amount_from_evidence: number | null;
+    confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+    notes: string;
+  };
+  overcharge_confirmed: boolean;
+  overcharge_amount: number | null;
+  overcharge_percentage: number | null;
+  risk_assessment: string;
+  complaint_draft: string;
+}
+
 export interface IncidentDetail {
   id: string;
   incident_type: string;
@@ -122,9 +142,14 @@ export interface IncidentDetail {
   latitude: number | null;
   longitude: number | null;
   status: string;
+  ai_analysis_status: 'PENDING' | 'PROCESSING' | 'DONE' | 'FAILED' | null;
+  ai_analysis_result: string | null;
+  ai_analysis_error: string | null;
+  ai_analyzed_at: string | null;
   created_at: string;
   evidences: EvidenceItem[];
 }
+
 
 export interface IncidentCreatePayload {
   incident_type: string;
@@ -217,3 +242,20 @@ export async function uploadEvidence(
     body: form,
   });
 }
+
+// ─── AI Analysis API ─────────────────────────────────────────────────────────
+
+export interface TriggerAnalysisResponse {
+  status: string;
+  result: AIAnalysisData;
+  analyzed_at: string;
+}
+
+export async function triggerAnalysis(
+  incidentId: string
+): Promise<TriggerAnalysisResponse> {
+  return apiFetch<TriggerAnalysisResponse>(`/analysis/${incidentId}`, {
+    method: 'POST',
+  });
+}
+

@@ -49,3 +49,11 @@ class IncidentResponse(BaseModel):
     longitude: float | None = None
 
     status: str
+
+    ai_analysis_status: str | None = "PENDING"
+
+    ai_analysis_result: str | None = None
+
+    ai_analysis_error: str | None = None
+
+    ai_analyzed_at: datetime | None = None

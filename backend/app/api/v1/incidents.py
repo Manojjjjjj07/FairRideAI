@@ -167,8 +167,21 @@ def get_incident_details(
         "status":
             incident.status,
 
+        "ai_analysis_status":
+            incident.ai_analysis_status,
+
+        "ai_analysis_result":
+            incident.ai_analysis_result,
+
+        "ai_analysis_error":
+            incident.ai_analysis_error,
+
+        "ai_analyzed_at":
+            incident.ai_analyzed_at,
+
         "created_at":
             incident.created_at,
+
 
         "evidences": [
 

@@ -101,6 +101,27 @@ class Incident(
         default="OPEN"
     )
 
+    ai_analysis_status: Mapped[str | None] = mapped_column(
+        String(20),
+        default="PENDING"
+    )
+
+    ai_analysis_result: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    ai_analysis_error: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    ai_analyzed_at: Mapped[DateTime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+
     user = relationship(
         "User",
         back_populates="incidents"

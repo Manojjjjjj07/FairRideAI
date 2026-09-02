@@ -7,6 +7,9 @@ from app.api.v1.incidents import router as incident_router
 from app.api.v1.evidence import (
     router as evidence_router
 )
+from app.api.v1.analysis import (
+    router as analysis_router
+)
 
 app = FastAPI(
     title="FairRide AI",
@@ -25,6 +28,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(incident_router)
 app.include_router(evidence_router)
+app.include_router(analysis_router)
+
 
 @app.get("/")
 def root():

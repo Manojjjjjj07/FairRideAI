@@ -7,9 +7,12 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    GEMINI_API_KEY: str | None = None
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
+
 
 
 settings = Settings()

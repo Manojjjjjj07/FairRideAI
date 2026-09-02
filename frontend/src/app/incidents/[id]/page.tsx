@@ -25,8 +25,10 @@ import {
 import Navbar from '@/components/layout/Navbar';
 import GlassCard from '@/components/ui/GlassCard';
 import Badge from '@/components/ui/Badge';
+import AIAnalysisCard from '@/components/ui/AIAnalysisCard';
 import type { BadgeVariant } from '@/components/ui/Badge';
 import { getIncident, type IncidentDetail, type EvidenceItem, ApiError } from '@/lib/api';
+
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -122,7 +124,7 @@ export default function IncidentDetailPage() {
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState('');
 
-  useEffect(() => {
+  const fetchIncident = () => {
     if (!id) return;
     getIncident(id)
       .then(setIncident)
@@ -136,7 +138,12 @@ export default function IncidentDetailPage() {
         }
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchIncident();
   }, [id]);
+
 
   // ── Loading State ──────────────────────────────────────────────────────────
   if (loading) {
@@ -255,22 +262,14 @@ export default function IncidentDetailPage() {
         </GlassCard>
 
         {/* AI Protection Engine Status */}
-        <GlassCard className="border-purple-500/30 bg-purple-500/5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 flex items-center justify-center">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white">AI Protection Engine</p>
-              <span className="text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Multi-Modal Analysis Ready
-              </span>
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Our multi-modal AI engine analyzes your uploaded app screenshots, payment receipts, and audio clips together to verify fare discrepancies and generate consumer court dispute complaints.
-          </p>
-        </GlassCard>
+        <AIAnalysisCard
+          incidentId={inc.id}
+          status={inc.ai_analysis_status}
+          rawResult={inc.ai_analysis_result}
+          rawError={inc.ai_analysis_error}
+          onAnalysisComplete={fetchIncident}
+        />
+
 
       </main>
     </div>
