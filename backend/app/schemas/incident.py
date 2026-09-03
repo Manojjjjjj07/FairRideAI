@@ -29,6 +29,8 @@ class IncidentCreateRequest(BaseModel):
 
     longitude: float | None = None
 
+    vehicle_number: str | None = None
+
 
 class IncidentResponse(BaseModel):
 

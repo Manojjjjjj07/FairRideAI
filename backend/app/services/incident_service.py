@@ -18,6 +18,9 @@ from app.repositories.evidence_repository import (
     EvidenceRepository
 )
 
+from app.services.driver_profile_service import DriverProfileService
+
+
 class IncidentService:
 
     @staticmethod
@@ -29,38 +32,31 @@ class IncidentService:
 
         incident = Incident(
             user_id=user_id,
-
             incident_type=payload.incident_type,
-
             severity=payload.severity,
-
             description=payload.description,
-
             platform=payload.platform,
-
             captain_name=payload.captain_name,
-
             captain_phone=payload.captain_phone,
-
             app_fare=payload.app_fare,
-
             demanded_fare=payload.demanded_fare,
-
             incident_datetime=payload.incident_datetime,
-
             location=payload.location,
-
             latitude=payload.latitude,
-
             longitude=payload.longitude,
-
+            vehicle_number=getattr(payload, 'vehicle_number', None),
             status="OPEN"
         )
 
-        return IncidentRepository.create(
-            db,
-            incident
-        )
+        saved = IncidentRepository.create(db, incident)
+
+        # Auto-link this incident to the cross-platform driver profile
+        if saved.captain_phone:
+            DriverProfileService.resolve_driver(db, saved)
+            db.commit()
+
+        return saved
+
 
     @staticmethod
     def get_incident(

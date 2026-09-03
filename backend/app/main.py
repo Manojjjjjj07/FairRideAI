@@ -10,6 +10,10 @@ from app.api.v1.evidence import (
 from app.api.v1.analysis import (
     router as analysis_router
 )
+from app.api.v1.operator import router as operator_router
+from app.api.v1.government import router as government_router
+from app.api.v1.routing import router as routing_router
+
 
 app = FastAPI(
     title="FairRide AI",
@@ -29,6 +33,10 @@ app.include_router(auth_router)
 app.include_router(incident_router)
 app.include_router(evidence_router)
 app.include_router(analysis_router)
+app.include_router(operator_router)
+app.include_router(government_router)
+app.include_router(routing_router)
+
 
 
 @app.get("/")

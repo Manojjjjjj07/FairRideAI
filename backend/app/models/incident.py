@@ -1,26 +1,13 @@
 import uuid
 # pyrefly: ignore [missing-import]
-from sqlalchemy import Float
-# pyrefly: ignore [missing-import]
-from sqlalchemy import ForeignKey
-# pyrefly: ignore [missing-import]
-from sqlalchemy import String
-# pyrefly: ignore [missing-import]
-from sqlalchemy import Text
-# pyrefly: ignore [missing-import]
-from sqlalchemy import DateTime
+from sqlalchemy import Boolean, Float, ForeignKey, String, Text, DateTime
 # pyrefly: ignore [missing-import]
 from sqlalchemy.dialects.postgresql import UUID
-
 # pyrefly: ignore [missing-import]
-from sqlalchemy.orm import Mapped
-# pyrefly: ignore [missing-import]
-from sqlalchemy.orm import mapped_column
-# pyrefly: ignore [missing-import]
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
-from app.db.mixins import UUIDMixin
-from app.db.mixins import TimestampMixin
+from app.db.mixins import UUIDMixin, TimestampMixin
+
 
 
 class Incident(
@@ -101,6 +88,39 @@ class Incident(
         default="OPEN"
     )
 
+    # --- Driver Profile Link (cross-platform blacklist engine) ---
+    driver_profile_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("driver_profiles.id"),
+        nullable=True,
+        index=True
+    )
+
+    vehicle_number: Mapped[str | None] = mapped_column(
+        String(30),
+        nullable=True
+    )
+
+    # --- Complaint Routing ---
+    routed_to_operator: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+
+    routed_to_government: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+
+    routed_at: Mapped[DateTime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+
+
     ai_analysis_status: Mapped[str | None] = mapped_column(
         String(20),
         default="PENDING"
@@ -132,3 +152,8 @@ class Incident(
         back_populates="incident",
         cascade="all, delete-orphan"
     )
+
+    driver_profile = relationship(
+        "DriverProfile",
+        back_populates="incidents"
+    )

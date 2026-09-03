@@ -89,15 +89,21 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link 
               href="/login"
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
+              className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
             >
-              Sign In
+              Commuter Sign In
             </Link>
             <Link 
-              href="/register"
-              className="px-5 py-2.5 text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:brightness-110 active:scale-[0.98] transition-all"
+              href="/operator/login"
+              className="px-3.5 py-2 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 border border-blue-500/20 rounded-xl"
             >
-              Start Free
+              Operator Portal
+            </Link>
+            <Link 
+              href="/government/login"
+              className="px-3.5 py-2 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors bg-violet-500/10 border border-violet-500/20 rounded-xl"
+            >
+              Govt Portal
             </Link>
           </div>
         </nav>
@@ -276,14 +282,14 @@ export default function LandingPage() {
             © 2026 FairRideAI. Protecting commuters from ride extortion.
           </p>
 
-          <div className="flex items-center gap-6 text-xs font-medium text-slate-400">
+          <div className="flex items-center gap-5 text-xs font-medium text-slate-400">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-            <Link href="/register" className="hover:text-white transition-colors">Register</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Commuter Login</Link>
+            <Link href="/operator/login" className="text-blue-400 hover:text-blue-300 transition-colors">Operator Portal</Link>
+            <Link href="/government/login" className="text-violet-400 hover:text-violet-300 transition-colors">Govt Portal</Link>
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
