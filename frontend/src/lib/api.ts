@@ -443,6 +443,13 @@ export async function getOperatorReports() {
   return portalFetch<unknown[]>('/operator/reports/');
 }
 
+export async function generateOperatorReport(reportType: 'WEEKLY' | 'MONTHLY' = 'WEEKLY') {
+  return portalFetch<{ message: string; report_id: string; ai_brief: str }>('/operator/reports/generate', {
+    method: 'POST',
+    body: JSON.stringify({ report_type: reportType }),
+  });
+}
+
 // ─── Government Portal API ────────────────────────────────────────────────────
 
 export async function governmentLogin(email: string, password: string): Promise<PortalLoginResponse> {
@@ -501,6 +508,13 @@ export async function getGovernmentIncidents(skip = 0, limit = 50, platform?: st
 
 export async function getGovernmentReports() {
   return portalFetch<unknown[]>('/government/reports/');
+}
+
+export async function generateGovernmentReport(reportType: 'WEEKLY' | 'MONTHLY' = 'MONTHLY', platform?: string) {
+  return portalFetch<{ message: string; report_id: string; ai_brief: str }>('/government/reports/generate', {
+    method: 'POST',
+    body: JSON.stringify({ report_type: reportType, platform: platform || null }),
+  });
 }
 
 // ─── Complaint Routing API ────────────────────────────────────────────────────

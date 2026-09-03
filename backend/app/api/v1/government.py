@@ -255,6 +255,45 @@ def government_clear_driver(
     return {"message": "Driver cleared from blacklist", "driver_id": str(driver_id)}
 
 
+CITY_COORDINATES: dict[str, tuple[float, float]] = {
+    "peelamedu": (11.0284, 77.0031),
+    "coimbatore": (11.0168, 76.9558),
+    "gandhipuram": (11.0183, 76.9644),
+    "chennai airport": (12.9806, 80.1638),
+    "chennai": (13.0827, 80.2707),
+    "guindy": (13.0067, 80.2020),
+    "velachery": (12.9759, 80.2212),
+    "t nagar": (13.0418, 80.2341),
+    "bangalore": (12.9716, 77.5946),
+    "bengaluru": (12.9716, 77.5946),
+    "koramangala": (12.9352, 77.6245),
+    "indiranagar": (12.9784, 77.6408),
+    "whitefield": (12.9698, 77.7500),
+    "hyderabad": (17.3850, 78.4867),
+    "hitech city": (17.4435, 78.3772),
+    "mumbai": (19.0760, 72.8777),
+    "andheri": (19.1197, 72.8464),
+    "delhi": (28.6139, 77.2090),
+    "gurgaon": (28.4595, 77.0266),
+    "noida": (28.5355, 77.3910),
+    "pune": (18.5204, 73.8567),
+    "kochi": (9.9312, 76.2673),
+    "trivandrum": (8.5241, 76.9366),
+}
+
+
+def resolve_coords(location_str: str | None, lat: float | None, lng: float | None) -> tuple[float | None, float | None]:
+    if lat is not None and lng is not None:
+        return lat, lng
+    if not location_str:
+        return None, None
+    loc_lower = location_str.lower()
+    for key, coords in CITY_COORDINATES.items():
+        if key in loc_lower:
+            return coords
+    return None, None
+
+
 # ─── Heatmap ─────────────────────────────────────────────────────────────────
 
 @router.get("/heatmap/")
@@ -263,23 +302,21 @@ def get_heatmap_data(
     portal_user: PortalUser = Depends(require_government)
 ):
     """Returns all incidents with lat/lng for Leaflet heatmap rendering."""
-    incidents = (
-        db.query(Incident)
-        .filter(Incident.latitude.isnot(None), Incident.longitude.isnot(None))
-        .all()
-    )
-    return [
-        {
-            "id": str(i.id),
-            "lat": i.latitude,
-            "lng": i.longitude,
-            "platform": i.platform,
-            "severity": i.severity,
-            "incident_type": i.incident_type,
-            "location": i.location,
-        }
-        for i in incidents
-    ]
+    incidents = db.query(Incident).all()
+    points = []
+    for i in incidents:
+        lat, lng = resolve_coords(i.location, i.latitude, i.longitude)
+        if lat is not None and lng is not None:
+            points.append({
+                "id": str(i.id),
+                "lat": lat,
+                "lng": lng,
+                "platform": i.platform,
+                "severity": i.severity,
+                "incident_type": i.incident_type,
+                "location": i.location or "Unknown Location",
+            })
+    return points
 
 
 # ─── Platform Compliance ─────────────────────────────────────────────────────
@@ -393,3 +430,32 @@ def list_reports(
         }
         for r in reports
     ]
+
+
+class GenerateGovReportRequest(BaseModel):
+    report_type: str = "MONTHLY"  # 'WEEKLY' or 'MONTHLY'
+    platform: str | None = None   # None = all platforms
+
+
+@router.post("/reports/generate")
+def generate_government_report(
+    payload: GenerateGovReportRequest,
+    db: Session = Depends(get_db),
+    portal_user: PortalUser = Depends(require_government)
+):
+    from app.services.report_service import ReportService
+    report = ReportService.generate_report(
+        db=db,
+        report_type=payload.report_type,
+        target_audience="GOVERNMENT",
+        platform=payload.platform
+    )
+    return {
+        "message": f"National {payload.report_type.upper()} report generated successfully",
+        "report_id": str(report.id),
+        "total_incidents": report.total_incidents,
+        "period_start": str(report.period_start),
+        "period_end": str(report.period_end),
+        "ai_brief": report.ai_brief,
+    }
+

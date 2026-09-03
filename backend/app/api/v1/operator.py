@@ -355,3 +355,31 @@ def list_reports(
         }
         for r in reports
     ]
+
+
+class GenerateReportRequest(BaseModel):
+    report_type: str = "WEEKLY"  # 'WEEKLY' or 'MONTHLY'
+
+
+@router.post("/reports/generate")
+def generate_operator_report(
+    payload: GenerateReportRequest,
+    db: Session = Depends(get_db),
+    portal_user: PortalUser = Depends(require_operator)
+):
+    from app.services.report_service import ReportService
+    report = ReportService.generate_report(
+        db=db,
+        report_type=payload.report_type,
+        target_audience="OPERATOR",
+        platform=portal_user.platform
+    )
+    return {
+        "message": f"{payload.report_type.upper()} report generated successfully for {portal_user.platform}",
+        "report_id": str(report.id),
+        "total_incidents": report.total_incidents,
+        "period_start": str(report.period_start),
+        "period_end": str(report.period_end),
+        "ai_brief": report.ai_brief,
+    }
+

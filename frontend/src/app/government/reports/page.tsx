@@ -9,7 +9,7 @@ import {
 import GlassCard from '@/components/ui/GlassCard';
 import Button from '@/components/ui/Button';
 import {
-  getPortalUser, clearPortalToken, getGovernmentReports,
+  getPortalUser, clearPortalToken, getGovernmentReports, generateGovernmentReport,
 } from '@/lib/api';
 
 const GovNav = ({ portalUser, onLogout }: { portalUser: ReturnType<typeof getPortalUser>; onLogout: () => void }) => (
@@ -50,11 +50,11 @@ export default function GovernmentReportsPage() {
   const [portalUser, setPortalUser] = useState<ReturnType<typeof getPortalUser>>(null);
   const [reports, setReports] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [genSuccess, setGenSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    const user = getPortalUser();
-    if (!user || user.role !== 'GOVERNMENT') { router.replace('/government/login'); return; }
-    setPortalUser(user);
+  const fetchReports = () => {
+    setLoading(true);
     getGovernmentReports()
       .then(data => setReports(data))
       .catch(err => {
@@ -62,8 +62,29 @@ export default function GovernmentReportsPage() {
         setReports([]);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    const user = getPortalUser();
+    if (!user || user.role !== 'GOVERNMENT') { router.replace('/government/login'); return; }
+    setPortalUser(user);
+    fetchReports();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleGenerate = async (reportType: 'WEEKLY' | 'MONTHLY') => {
+    setGenerating(true);
+    setGenSuccess(null);
+    try {
+      await generateGovernmentReport(reportType);
+      setGenSuccess(`✨ National ${reportType} Intelligence Report generated via Gemini 3.8 Flash!`);
+      fetchReports();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const handleLogout = () => { clearPortalToken(); router.replace('/government/login'); };
 
@@ -72,14 +93,41 @@ export default function GovernmentReportsPage() {
       <GovNav portalUser={portalUser} onLogout={handleLogout} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-white">National Transport Intelligence Reports</h1>
             <p className="text-slate-400 text-sm mt-1">
-              Monthly executive intelligence briefs powered by Gemini 3.8 Flash for State Transport Authorities
+              Cross-platform executive intelligence briefs powered by Gemini 3.8 Flash for State Transport Authorities
             </p>
           </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="cyan"
+              size="sm"
+              loading={generating}
+              onClick={() => handleGenerate('WEEKLY')}
+              className="!from-violet-600 !via-purple-600 !to-indigo-600 !shadow-violet-500/25"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Generate Weekly Brief
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              loading={generating}
+              onClick={() => handleGenerate('MONTHLY')}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" /> Generate Monthly Brief
+            </Button>
+          </div>
         </div>
+
+        {genSuccess && (
+          <div className="mb-6 p-4 rounded-xl bg-violet-500/10 border border-violet-500/30 text-xs text-violet-300 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-violet-400 shrink-0" />
+            <span>{genSuccess}</span>
+          </div>
+        )}
 
         {loading ? (
           <div className="space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="h-32 bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse" />)}</div>
@@ -89,9 +137,20 @@ export default function GovernmentReportsPage() {
               <Sparkles className="w-6 h-6" />
             </div>
             <h3 className="text-base font-bold text-white mb-1">No Government Reports Generated Yet</h3>
-            <p className="text-xs text-slate-400 max-w-md leading-relaxed">
-              National intelligence briefs synthesize cross-platform driver misconduct patterns, city hotspot clusters, and compliance scorecards across Rapido, Ola, Uber, Namma Yatri, and InDrive.
+            <p className="text-xs text-slate-400 max-w-md leading-relaxed mb-6">
+              National intelligence briefs synthesize cross-platform driver misconduct patterns, city hotspot clusters, and compliance scorecards across Rapido, Ola, Uber, Namma Yatri, and InDrive using Gemini 3.8 Flash.
             </p>
+            <div className="flex gap-3">
+              <Button
+                variant="cyan"
+                size="sm"
+                loading={generating}
+                onClick={() => handleGenerate('MONTHLY')}
+                className="!from-violet-600 !via-purple-600 !to-indigo-600"
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Generate Monthly National Report Now
+              </Button>
+            </div>
           </GlassCard>
         ) : (
           <div className="space-y-4">

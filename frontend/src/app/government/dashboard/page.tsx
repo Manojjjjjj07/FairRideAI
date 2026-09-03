@@ -75,8 +75,8 @@ function HeatmapSection({ points }: { points: HeatmapPoint[] }) {
       const map = L.map(mapRef.current!, { zoomControl: true, scrollWheelZoom: true })
         .setView([avgLat, avgLng], 11);
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
       }).addTo(map);
 
