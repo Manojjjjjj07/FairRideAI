@@ -10,8 +10,11 @@ env/
 ENV/
 
 # User Uploads & Media (Ignore user uploaded files, preserve directory via .gitkeep)
+uploads/
 uploads/*
 !uploads/.gitkeep
+backend/uploads/
+backend/uploads
 backend/uploads/*
 !backend/uploads/.gitkeep
 
