@@ -3,11 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Shield, ArrowLeft, User, Mail, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Shield, ArrowLeft, User, Mail, Lock, Check, AlertCircle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { authRegister, authLogin, getMe, setToken, setStoredUser, ApiError } from '@/lib/api';
 import { useRedirectIfAuth } from '@/lib/auth';
+
+const S = {
+  bg:          '#000000',
+  surface:     'rgba(255,255,255,0.04)',
+  border:      'rgba(255,255,255,0.08)',
+  textPrimary: '#f5f5f7',
+  textSecond:  '#86868b',
+  textTert:    '#515154',
+};
 
 const perks = [
   'Free lifetime account',
@@ -33,18 +42,11 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      // 1. Create account
       await authRegister({ name, email, password });
-
-      // 2. Auto-login to get the token
       const { access_token } = await authLogin({ email, password });
       setToken(access_token);
-
-      // 3. Fetch and store user profile
       const me = await getMe();
       setStoredUser(me);
-
-      // 4. Navigate to dashboard
       router.replace('/dashboard');
     } catch (err) {
       if (err instanceof ApiError) {
@@ -57,94 +59,143 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden bg-[#070a14]">
-      
-      {/* Mesh glow orb */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
-
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-5 py-16 relative"
+      style={{ backgroundColor: S.bg }}
+    >
       {/* Back button */}
-      <Link href="/"
-        className="fixed top-6 left-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors bg-slate-900/60 border border-slate-800 px-3.5 py-2 rounded-xl">
-        <ArrowLeft className="w-4 h-4" /> Back to Home
+      <Link
+        href="/"
+        className="fixed top-5 left-5 inline-flex items-center gap-2 font-medium rounded-full transition-all hover:opacity-70"
+        style={{
+          fontSize: 13,
+          color: S.textSecond,
+          background: S.surface,
+          border: `1px solid ${S.border}`,
+          padding: '8px 16px',
+        }}
+      >
+        <ArrowLeft style={{ width: 14, height: 14 }} />
+        Back
       </Link>
 
-      <div className="w-full max-w-[420px] relative z-10">
-        
-        {/* Header Branding */}
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30 flex items-center justify-center mx-auto mb-4 glow-cyan">
-            <Shield className="w-6 h-6 text-cyan-400" />
+      <div className="w-full relative z-10" style={{ maxWidth: 400 }}>
+
+        {/* Logo + heading */}
+        <div className="text-center mb-7">
+          <div
+            className="w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: S.surface, border: `1px solid ${S.border}` }}
+          >
+            <Shield style={{ width: 20, height: 20, color: S.textPrimary }} />
           </div>
-          <h1 className="text-2xl font-extrabold text-white">Create Account</h1>
-          <p className="text-slate-400 text-xs mt-1">Start protecting your rides with evidence</p>
+          <h1
+            className="font-bold tracking-tight"
+            style={{ fontSize: 26, color: S.textPrimary, letterSpacing: '-0.015em' }}
+          >
+            Create account
+          </h1>
+          <p className="mt-1.5" style={{ fontSize: 13, color: S.textSecond }}>
+            Start protecting your rides with evidence
+          </p>
         </div>
 
-        {/* Perks list */}
-        <div className="flex flex-col gap-2 mb-6 bg-slate-900/40 p-3.5 rounded-2xl border border-slate-800/60">
+        {/* Perks */}
+        <div
+          className="flex flex-col gap-2 mb-5 rounded-2xl"
+          style={{
+            background: S.surface,
+            border: `1px solid ${S.border}`,
+            padding: '14px 16px',
+          }}
+        >
           {perks.map((perk) => (
             <div key={perk} className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-xs text-slate-300 font-medium">{perk}</span>
+              <div
+                className="flex items-center justify-center rounded-full shrink-0"
+                style={{ width: 18, height: 18, background: 'rgba(255,255,255,0.08)' }}
+              >
+                <Check style={{ width: 10, height: 10, color: S.textPrimary }} />
+              </div>
+              <span style={{ fontSize: 12, color: S.textSecond }}>{perk}</span>
             </div>
           ))}
         </div>
 
-        {/* Card */}
-        <div className="glass-card p-8 rounded-2xl border-t border-slate-700/60 shadow-2xl">
+        {/* Form card */}
+        <div
+          className="rounded-2xl"
+          style={{ background: S.surface, border: `1px solid ${S.border}`, padding: '28px' }}
+        >
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
 
-            <Input
-              label="Full name"
-              id="register-name"
-              type="text"
-              placeholder="Manoj S.K"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              icon={<User className="w-4 h-4 text-slate-400" />}
-              required
-            />
+            <div className="flex flex-col gap-1.5">
+              <label style={{ fontSize: 12, fontWeight: 500, color: S.textSecond }}>Full name</label>
+              <Input
+                id="register-name"
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                icon={<User style={{ width: 15, height: 15, color: S.textTert }} />}
+                required
+              />
+            </div>
 
-            <Input
-              label="Email address"
-              id="register-email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              icon={<Mail className="w-4 h-4 text-slate-400" />}
-              required
-            />
+            <div className="flex flex-col gap-1.5">
+              <label style={{ fontSize: 12, fontWeight: 500, color: S.textSecond }}>Email address</label>
+              <Input
+                id="register-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                icon={<Mail style={{ width: 15, height: 15, color: S.textTert }} />}
+                required
+              />
+            </div>
 
-            <Input
-              label="Password"
-              id="register-password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              icon={<Lock className="w-4 h-4 text-slate-400" />}
-              hint="Minimum 8 characters"
-              required
-            />
+            <div className="flex flex-col gap-1.5">
+              <label style={{ fontSize: 12, fontWeight: 500, color: S.textSecond }}>Password</label>
+              <Input
+                id="register-password"
+                type="password"
+                placeholder="At least 8 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                icon={<Lock style={{ width: 15, height: 15, color: S.textTert }} />}
+                hint="Minimum 8 characters"
+                required
+              />
+            </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-xs text-red-300 flex items-center gap-2 font-medium">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
+              <div
+                className="flex items-center gap-2 rounded-xl px-4 py-3"
+                style={{
+                  background: 'rgba(255,80,80,0.08)',
+                  border: '1px solid rgba(255,80,80,0.20)',
+                }}
+              >
+                <AlertCircle style={{ width: 14, height: 14, color: '#fca5a5', flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: '#fca5a5' }}>{error}</span>
               </div>
             )}
 
-            <Button type="submit" fullWidth size="lg" loading={loading} variant="cyan" className="mt-2">
+            <Button type="submit" fullWidth size="lg" loading={loading} variant="primary" className="mt-1">
               {loading ? 'Creating account…' : 'Create Free Account'}
             </Button>
           </form>
         </div>
 
         {/* Login link */}
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <p className="text-center mt-6" style={{ fontSize: 13, color: S.textTert }}>
           Already have an account?{' '}
-          <Link href="/login"
-            className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors">
+          <Link
+            href="/login"
+            className="font-medium transition-colors hover:opacity-70"
+            style={{ color: S.textSecond }}
+          >
             Sign in
           </Link>
         </p>

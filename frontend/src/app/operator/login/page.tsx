@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, ArrowLeft, Mail, Lock, AlertCircle, Shield, Info } from 'lucide-react';
+import { Building2, ArrowLeft, Mail, Lock, AlertCircle, Info } from 'lucide-react';
 import Link from 'next/link';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import GlassCard from '@/components/ui/GlassCard';
 import {
   operatorLogin,
   operatorRegister,
@@ -16,15 +15,24 @@ import {
   type PortalUserResponse,
 } from '@/lib/api';
 
+const S = {
+  bg:          '#000000',
+  surface:     'rgba(255,255,255,0.04)',
+  border:      'rgba(255,255,255,0.08)',
+  textPrimary: '#f5f5f7',
+  textSecond:  '#86868b',
+  textTert:    '#515154',
+};
+
 export default function OperatorLoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [mode,     setMode]     = useState<'login' | 'register'>('login');
+  const [name,     setName]     = useState('');
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState('');
+  const [success,  setSuccess]  = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +44,7 @@ export default function OperatorLoginPage() {
     try {
       if (mode === 'register') {
         await operatorRegister(name, email, password);
-        setSuccess('Account created! You can now log in.');
+        setSuccess('Account created! You can now sign in.');
         setMode('login');
       } else {
         const resp = await operatorLogin(email, password);
@@ -57,99 +65,166 @@ export default function OperatorLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 relative overflow-hidden bg-[#070a14]">
-      {/* Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-700/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-indigo-700/8 rounded-full blur-[120px] pointer-events-none" />
-
-      <Link href="/"
-        className="fixed top-6 left-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors bg-slate-900/60 border border-slate-800 px-3.5 py-2 rounded-xl">
-        <ArrowLeft className="w-4 h-4" /> Back to Home
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-5 py-16 relative"
+      style={{ backgroundColor: S.bg }}
+    >
+      {/* Back button */}
+      <Link
+        href="/"
+        className="fixed top-5 left-5 inline-flex items-center gap-2 font-medium rounded-full transition-all hover:opacity-70"
+        style={{
+          fontSize: 13,
+          color: S.textSecond,
+          background: S.surface,
+          border: `1px solid ${S.border}`,
+          padding: '8px 16px',
+        }}
+      >
+        <ArrowLeft style={{ width: 14, height: 14 }} />
+        Back
       </Link>
 
-      <div className="w-full max-w-[420px] relative z-10">
+      <div className="w-full relative z-10" style={{ maxWidth: 400 }}>
+
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600/30 to-indigo-600/30 border border-blue-500/40 mb-4 shadow-lg shadow-blue-500/20">
-            <Building2 className="w-7 h-7 text-blue-400" />
+          <div
+            className="w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: S.surface, border: `1px solid ${S.border}` }}
+          >
+            <Building2 style={{ width: 20, height: 20, color: S.textPrimary }} />
           </div>
-          <h1 className="text-2xl font-extrabold text-white mb-1">Operator Portal</h1>
-          <p className="text-sm text-slate-400">
-            {mode === 'login' ? 'Sign in to your company account' : 'Register your company account'}
+          <p
+            className="mb-1 font-medium uppercase tracking-widest"
+            style={{ fontSize: 10, color: S.textTert, letterSpacing: '0.15em', fontFamily: 'monospace' }}
+          >
+            Operator
+          </p>
+          <h1
+            className="font-bold tracking-tight"
+            style={{ fontSize: 26, color: S.textPrimary, letterSpacing: '-0.015em' }}
+          >
+            {mode === 'login' ? 'Sign in' : 'Create account'}
+          </h1>
+          <p className="mt-1.5" style={{ fontSize: 13, color: S.textSecond }}>
+            {mode === 'login' ? 'Company portal access' : 'Register your company account'}
           </p>
         </div>
 
-        <GlassCard className="p-6 mb-4">
-          {/* Domain hint */}
-          <div className="flex items-start gap-2.5 bg-blue-500/10 border border-blue-500/25 rounded-xl p-3 mb-5">
-            <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-blue-300 leading-relaxed">
-              Use your company email domain to access. Supported: <span className="font-mono font-bold">@rapido.com, @ola.com, @uber.com, @nammayatri.in, @indrive.com</span>
-            </p>
-          </div>
+        {/* Domain hint */}
+        <div
+          className="flex items-start gap-2.5 rounded-2xl mb-4"
+          style={{
+            background: S.surface,
+            border: `1px solid ${S.border}`,
+            padding: '14px 16px',
+          }}
+        >
+          <Info style={{ width: 14, height: 14, color: S.textTert, flexShrink: 0, marginTop: 1 }} />
+          <p style={{ fontSize: 11, color: S.textSecond, lineHeight: 1.6 }}>
+            Use your company email. Supported domains:{' '}
+            <span style={{ fontFamily: 'monospace', color: S.textPrimary }}>
+              @rapido.com, @ola.com, @uber.com, @nammayatri.in, @indrive.com
+            </span>
+          </p>
+        </div>
 
+        {/* Form card */}
+        <div
+          className="rounded-2xl mb-4"
+          style={{ background: S.surface, border: `1px solid ${S.border}`, padding: '28px' }}
+        >
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
             {mode === 'register' && (
-              <Input
-                id="op-name"
-                label="Full Name"
-                placeholder="Your full name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-              />
+              <div className="flex flex-col gap-1.5">
+                <label style={{ fontSize: 12, fontWeight: 500, color: S.textSecond }}>Full name</label>
+                <Input
+                  id="op-name"
+                  placeholder="Your full name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                />
+              </div>
             )}
-            <Input
-              id="op-email"
-              label="Company Email"
-              type="email"
-              placeholder="you@rapido.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              icon={<Mail className="w-4 h-4" />}
-            />
-            <Input
-              id="op-password"
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              icon={<Lock className="w-4 h-4" />}
-            />
+
+            <div className="flex flex-col gap-1.5">
+              <label style={{ fontSize: 12, fontWeight: 500, color: S.textSecond }}>Company email</label>
+              <Input
+                id="op-email"
+                type="email"
+                placeholder="you@rapido.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                icon={<Mail style={{ width: 15, height: 15, color: S.textTert }} />}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label style={{ fontSize: 12, fontWeight: 500, color: S.textSecond }}>Password</label>
+              <Input
+                id="op-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                icon={<Lock style={{ width: 15, height: 15, color: S.textTert }} />}
+              />
+            </div>
 
             {error && (
-              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5 text-xs text-red-300">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-            {success && (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-2.5 text-xs text-emerald-300">
-                {success}
+              <div
+                className="flex items-center gap-2 rounded-xl px-4 py-3"
+                style={{
+                  background: 'rgba(255,80,80,0.08)',
+                  border: '1px solid rgba(255,80,80,0.20)',
+                }}
+              >
+                <AlertCircle style={{ width: 14, height: 14, color: '#fca5a5', flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: '#fca5a5' }}>{error}</span>
               </div>
             )}
 
-            <Button type="submit" variant="primary" size="md" fullWidth loading={loading}>
+            {success && (
+              <div
+                className="rounded-xl px-4 py-3"
+                style={{
+                  background: 'rgba(80,255,160,0.06)',
+                  border: '1px solid rgba(80,255,160,0.18)',
+                }}
+              >
+                <span style={{ fontSize: 12, color: '#6ee7b7' }}>{success}</span>
+              </div>
+            )}
+
+            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
               {mode === 'login' ? 'Sign In' : 'Create Account'}
             </Button>
+
+            <p className="text-center" style={{ fontSize: 12, color: S.textTert }}>
+              {mode === 'login' ? "Don't have an account? " : 'Already registered? '}
+              <button
+                type="button"
+                className="font-medium transition-colors hover:opacity-70"
+                style={{ color: S.textSecond }}
+                onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setSuccess(''); }}
+              >
+                {mode === 'login' ? 'Register' : 'Sign In'}
+              </button>
+            </p>
           </form>
+        </div>
 
-          <p className="text-center text-xs text-slate-500 mt-4">
-            {mode === 'login' ? "Don't have an account? " : "Already registered? "}
-            <button
-              type="button"
-              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-              onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setSuccess(''); }}
-            >
-              {mode === 'login' ? 'Register' : 'Sign In'}
-            </button>
-          </p>
-        </GlassCard>
-
-        <p className="text-center text-xs text-slate-600">
-          Are you a government officer?{' '}
-          <Link href="/government/login" className="text-slate-400 hover:text-white transition-colors">
-            Go to Government Portal →
+        {/* Cross-portal link */}
+        <p className="text-center" style={{ fontSize: 12, color: S.textTert }}>
+          Government officer?{' '}
+          <Link
+            href="/government/login"
+            className="transition-colors hover:opacity-70"
+            style={{ color: S.textSecond }}
+          >
+            Government Portal →
           </Link>
         </p>
       </div>

@@ -30,19 +30,19 @@ interface AsLink extends BaseProps {
 
 type ButtonProps = AsButton | AsLink;
 
-/* ── Style maps ── */
+/* ── Style maps — Apple monochrome system ── */
 const variantCls: Record<Variant, string> = {
-  primary: 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:brightness-110 active:scale-[0.98]',
-  cyan:    'bg-gradient-to-r from-cyan-500 via-teal-500 to-blue-500 text-slate-950 font-bold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:brightness-110 active:scale-[0.98]',
-  outline: 'bg-slate-900/40 border border-slate-700/60 text-slate-200 font-medium hover:bg-slate-800/60 hover:border-slate-500/60 hover:text-white active:scale-[0.98]',
-  ghost:   'text-slate-300 font-medium hover:text-white hover:bg-white/5 active:scale-[0.98]',
-  danger:  'bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold shadow-lg shadow-red-500/25 hover:brightness-110 active:scale-[0.98]',
+  primary: 'bg-[#f5f5f7] text-[#000000] font-semibold shadow-lg shadow-white/10 hover:bg-white hover:shadow-white/15 active:scale-[0.97]',
+  cyan:    'bg-[#f5f5f7] text-[#000000] font-semibold shadow-lg shadow-white/10 hover:bg-white active:scale-[0.97]',
+  outline: 'border border-[rgba(255,255,255,0.08)] text-[#f5f5f7] font-medium hover:border-[rgba(255,255,255,0.16)] hover:bg-[rgba(255,255,255,0.05)] active:scale-[0.97]',
+  ghost:   'text-[#86868b] font-medium hover:text-[#f5f5f7] hover:bg-[rgba(255,255,255,0.05)] active:scale-[0.97]',
+  danger:  'bg-[rgba(255,80,80,0.10)] border border-[rgba(255,80,80,0.22)] text-[#fca5a5] font-semibold hover:bg-[rgba(255,80,80,0.16)] active:scale-[0.97]',
 };
 
 const sizeCls: Record<Size, string> = {
-  sm: 'px-3.5 py-1.5 text-xs rounded-lg gap-1.5',
-  md: 'px-5 py-2.5 text-sm rounded-xl gap-2',
-  lg: 'px-7 py-3.5 text-base rounded-xl gap-2.5 font-semibold',
+  sm: 'px-3.5 py-1.5 text-xs rounded-full gap-1.5',
+  md: 'px-5 py-2.5 text-sm rounded-full gap-2',
+  lg: 'px-7 py-3.5 text-[15px] rounded-full gap-2.5 font-semibold',
 };
 
 export default function Button(props: ButtonProps) {

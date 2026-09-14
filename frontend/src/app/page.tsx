@@ -1,295 +1,497 @@
-import Link from 'next/link';
-import { 
-  Shield, 
-  ShieldCheck,
-  FileText, 
-  Sparkles, 
-  ArrowRight, 
-  CheckCircle2, 
-  Lock, 
-  ShieldAlert, 
-  Zap, 
-  BarChart3, 
-  ChevronRight,
-  Scale
-} from 'lucide-react';
+'use client';
 
-/* ── Static feature data ── */
-const features = [
+import React, { useState } from 'react';
+import Link from 'next/link';
+import {
+  Shield,
+  Sparkles,
+  ArrowRight,
+  ShieldAlert,
+  ChevronRight,
+  Building2,
+  Landmark,
+  Users,
+} from 'lucide-react';
+import GlobeCanvas from '@/components/ui/GlobeCanvas';
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+const stats = [
+  { value: '5',        unit: 'Platforms',  label: 'Cross-platform ride sync'   },
+  { value: '24/7',     unit: '',           label: 'AI-powered incident engine'  },
+  { value: 'CPA 2019', unit: '',           label: 'Consumer protection aligned' },
+];
+
+const portals = [
   {
-    icon: FileText,
-    title: 'Document Incidents',
-    description:
-      'Log every extortion attempt — platform, captain details, location, time, and the exact fare demanded versus what the app showed.',
-    badge: null,
-    gradient: 'from-blue-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    role: 'Commuter',
+    icon: Users,
+    title: 'Commuter Portal',
+    desc: 'File ride-extortion incidents, upload app screenshots and payment proofs, and receive AI-drafted Consumer Court notices.',
+    href: '/login',
+    cta: 'File a Complaint',
   },
   {
-    icon: Lock,
-    title: 'Multi-Source Evidence',
-    description:
-      'Upload app fare screenshots, UPI payment proofs, audio recordings, and chat exports into one secure, tamper-proof case file.',
-    badge: null,
-    gradient: 'from-indigo-500/20 to-purple-500/20 text-indigo-400 border-indigo-500/30',
+    role: 'Operator',
+    icon: Building2,
+    title: 'Operator Portal',
+    desc: 'For Rapido, Ola, Uber compliance teams — review driver risk scores, inspect cross-platform flags, and act on routed complaints.',
+    href: '/operator/login',
+    cta: 'Operator Access',
+  },
+  {
+    role: 'Government',
+    icon: Landmark,
+    title: 'State Transport Portal',
+    desc: 'For RTOs and Regulators — view live incident heatmaps, evaluate platform compliance, and issue multi-platform blacklists.',
+    href: '/government/login',
+    cta: 'Government Access',
+  },
+];
+
+const features = [
+  {
+    icon: ShieldAlert,
+    title: 'Cross-Platform Identity Engine',
+    body: 'Canonical identity resolution maps driver phone numbers and vehicle aliases across Rapido, Ola, Uber, Namma Yatri, and InDrive to surface repeat offenders.',
   },
   {
     icon: Sparkles,
-    title: 'AI Protection Engine',
-    description:
-      'Our multi-modal AI engine analyzes your full evidence package together, generating verifiable consumer court dispute complaints.',
-    badge: 'AI Engine Ready',
-    gradient: 'from-purple-500/20 to-pink-500/20 text-purple-400 border-purple-500/30',
+    title: 'Multi-Modal AI Proof Engine',
+    body: 'Gemini 3.8 Flash cross-checks ride screenshots, app fares, and UPI payment proofs to verify overcharge gaps and draft legal notices.',
+  },
+  {
+    icon: Landmark,
+    title: 'Regulatory Actioning',
+    body: 'Complaints automatically sync to platform operators and State Transport Authorities for compliance review and binding blacklist orders.',
   },
 ];
 
-const steps = [
-  {
-    num: '01',
-    title: 'Log Incident Details',
-    body: 'Fill in the structured report wizard with ride date, platform, captain identity, and fare difference.',
-    icon: Zap,
-  },
-  {
-    num: '02',
-    title: 'Attach Proofs',
-    body: 'Upload screenshots of the app fare, payment proof, or audio clips supporting your claim.',
-    icon: FileText,
-  },
-  {
-    num: '03',
-    title: 'Generate Legal Complaint',
-    body: 'Receive an evidence-backed complaint report ready for submission to platform support or consumer forums.',
-    icon: Scale,
-  },
-];
+// ─── Shared style tokens ───────────────────────────────────────────────────────
+// Apple-style monochrome — no colour, extreme restraint
+const S = {
+  bg:           '#000000',
+  surfaceCard:  'rgba(255,255,255,0.04)',
+  borderSubtle: 'rgba(255,255,255,0.08)',
+  borderFaint:  'rgba(255,255,255,0.05)',
+  textPrimary:  '#f5f5f7',   // Apple's exact off-white
+  textSecond:   '#86868b',   // Apple's secondary grey
+  textTert:     '#515154',   // Apple's tertiary grey
+};
 
+// ─── Portal card with hover effect ────────────────────────────────────────────
+interface PortalHoverCardProps {
+  role: string;
+  Icon: React.ElementType;
+  title: string;
+  desc: string;
+  href: string;
+  cta: string;
+}
+
+function PortalHoverCard({ role, Icon, title, desc, href, cta }: PortalHoverCardProps) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="flex flex-col rounded-2xl transition-all duration-300"
+      style={{
+        background: hovered ? 'rgba(255,255,255,0.06)' : S.surfaceCard,
+        border: `1px solid ${hovered ? S.borderSubtle : S.borderFaint}`,
+        padding: '28px',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex items-center justify-between mb-8">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${S.borderSubtle}` }}
+        >
+          <Icon style={{ width: 18, height: 18, color: S.textPrimary }} />
+        </div>
+        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: S.textTert, fontFamily: 'monospace' }}>
+          {role}
+        </span>
+      </div>
+      <h3 className="font-semibold mb-3" style={{ fontSize: 18, color: S.textPrimary }}>{title}</h3>
+      <p className="flex-1 mb-8" style={{ fontSize: 13, color: S.textSecond, lineHeight: 1.7 }}>{desc}</p>
+      <Link
+        href={href}
+        className="inline-flex items-center gap-1 font-semibold transition-opacity hover:opacity-70"
+        style={{ fontSize: 14, color: S.textPrimary }}
+      >
+        {cta}
+        <ChevronRight style={{ width: 15, height: 15, color: S.textTert }} />
+      </Link>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden bg-[#070a14]">
+    <div
+      className="relative min-h-screen flex flex-col overflow-x-hidden font-sans antialiased"
+      style={{ backgroundColor: S.bg, color: S.textPrimary }}
+    >
 
-      {/* ── Background Mesh Light Orbs ── */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden -z-0">
-        <div className="absolute top-0 left-1/4 w-[650px] h-[650px] rounded-full bg-blue-600/10 blur-[130px]" />
-        <div className="absolute top-1/3 right-10 w-[550px] h-[550px] rounded-full bg-indigo-600/10 blur-[130px]" />
-        <div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full bg-cyan-500/10 blur-[130px]" />
-      </div>
+      {/* ── Navigation ──────────────────────────────────────────────────────── */}
+      <header
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: 'rgba(0,0,0,0.72)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          borderBottom: `1px solid ${S.borderFaint}`,
+        }}
+      >
+        <nav className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
 
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-30 w-full glass-nav">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30 flex items-center justify-center glow-cyan">
-              <Shield className="w-5 h-5 text-cyan-400" />
-            </div>
-            <span className="font-bold text-white text-lg tracking-tight">
-              FairRide<span className="text-gradient-cyan">AI</span>
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <Shield
+              className="transition-opacity group-hover:opacity-70"
+              style={{ width: 18, height: 18, color: S.textPrimary }}
+            />
+            <span
+              className="font-semibold tracking-tight"
+              style={{ fontSize: 16, color: S.textPrimary }}
+            >
+              FairRide<span style={{ color: S.textSecond }}>AI</span>
             </span>
-          </div>
+          </Link>
 
-          <div className="flex items-center gap-3">
-            <Link 
+          {/* Links + CTA */}
+          <div className="flex items-center gap-1">
+            <Link
               href="/login"
-              className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
+              className="px-3.5 py-2 text-[13px] font-medium rounded-lg transition-colors hover:bg-white/5"
+              style={{ color: S.textSecond }}
             >
-              Commuter Sign In
+              Sign In
             </Link>
-            <Link 
+            <Link
               href="/operator/login"
-              className="px-3.5 py-2 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors bg-blue-500/10 border border-blue-500/20 rounded-xl"
+              className="hidden sm:inline-block px-3.5 py-2 text-[13px] font-medium rounded-lg transition-colors hover:bg-white/5"
+              style={{ color: S.textSecond }}
             >
-              Operator Portal
+              Operator
             </Link>
-            <Link 
+            <Link
               href="/government/login"
-              className="px-3.5 py-2 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors bg-violet-500/10 border border-violet-500/20 rounded-xl"
+              className="hidden sm:inline-block px-3.5 py-2 text-[13px] font-medium rounded-lg transition-colors hover:bg-white/5"
+              style={{ color: S.textSecond }}
             >
-              Govt Portal
+              Government
+            </Link>
+
+            {/* Primary CTA — Apple-style: white pill, dark text */}
+            <Link
+              href="/register"
+              className="ml-2 inline-flex items-center gap-2 font-semibold rounded-full transition-all active:scale-[0.97]"
+              style={{
+                fontSize: 13,
+                padding: '8px 18px',
+                background: S.textPrimary,
+                color: '#000000',
+              }}
+            >
+              Report Incident
             </Link>
           </div>
         </nav>
       </header>
 
-      <main className="flex-1 relative z-10">
+      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      {/*
+        Layout mirrors Apple's product pages:
+        - Globe fills the entire hero as background
+        - Headline + sub + CTA float in the lower-centre of the sphere
+        - Stats anchored at the very bottom of the hero
+      */}
+      <section
+        className="relative w-full"
+        style={{ minHeight: 'calc(100vh - 56px)', overflow: 'hidden' }}
+      >
+        {/* Globe — absolute fill, cursor-grabbable */}
+        <GlobeCanvas />
 
-        {/* ── Hero Section ── */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-16 text-center">
+        {/* Text overlay — sits over the dark lower hemisphere */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
+          style={{ paddingBottom: 88 }}
+        >
+          {/* Eyebrow — tiny, all-caps, Apple-style */}
+          <p
+            className="mb-5 font-medium uppercase tracking-widest"
+            style={{ fontSize: 11, color: S.textTert, letterSpacing: '0.15em' }}
+          >
+            Commuter Protection · India
+          </p>
 
-          {/* Glowing Status Pill */}
-          <div className="inline-flex items-center gap-2.5 glass px-4 py-2 rounded-full border border-blue-500/30 mb-8 shadow-inner shadow-blue-500/20">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
-            </span>
-            <span className="text-xs font-semibold text-slate-200 uppercase tracking-widest">
-              AI-POWERED COMMUTER PROTECTION ENGINE
-            </span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6 text-white">
-            Stop Ride Extortion.<br />
-            <span className="text-gradient-cyan">Document. Analyze. Fight Back.</span>
+          {/* Headline — large, white, no gradient */}
+          <h1
+            className="font-bold tracking-tight"
+            style={{
+              fontSize: 'clamp(2.8rem, 6.5vw, 5.5rem)',
+              lineHeight: 1.05,
+              color: S.textPrimary,
+              maxWidth: 780,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Protecting Every Ride.{' '}
+            <span style={{ color: S.textSecond }}>Seamlessly.</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="max-w-2xl mx-auto text-base sm:text-xl text-slate-400 leading-relaxed mb-10">
-            FairRideAI helps commuters build bulletproof, evidence-backed case reports against captain fare overcharging, forced cancellations, and rider harassment.
+          <p
+            className="mt-6"
+            style={{
+              fontSize: 'clamp(1rem, 1.8vw, 1.2rem)',
+              color: S.textSecond,
+              maxWidth: 540,
+              lineHeight: 1.65,
+            }}
+          >
+            Smart, reliable ride-extortion solutions across Rapido, Ola, Uber,
+            Namma Yatri, and InDrive — anywhere your rights need protecting.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link 
+          {/* CTAs */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {/* Primary: white pill — Apple's standard */}
+            <Link
               href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white font-bold text-base rounded-xl shadow-xl shadow-blue-600/30 hover:shadow-blue-500/50 hover:brightness-110 active:scale-[0.98] transition-all animate-pulse-glow"
+              className="inline-flex items-center gap-2.5 font-semibold rounded-full transition-all active:scale-[0.97]"
+              style={{
+                fontSize: 15,
+                padding: '14px 28px',
+                background: S.textPrimary,
+                color: '#000000',
+              }}
             >
-              <ShieldAlert className="w-5 h-5 text-cyan-300" />
-              <span>Report an Incident Now</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
+              Get Started
+              <span
+                className="inline-flex items-center justify-center rounded-full"
+                style={{ width: 24, height: 24, background: '#000000', flexShrink: 0 }}
+              >
+                <ArrowRight style={{ width: 12, height: 12, color: '#ffffff' }} />
+              </span>
             </Link>
 
-            <a 
-              href="#how-it-works"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 bg-slate-900/50 border border-slate-700/70 text-slate-200 font-semibold text-base rounded-xl hover:bg-slate-800/60 hover:border-slate-500/70 transition-all"
+            {/* Secondary: ghost pill */}
+            <a
+              href="#portals"
+              className="inline-flex items-center gap-1.5 font-semibold rounded-full transition-all active:scale-[0.97]"
+              style={{
+                fontSize: 15,
+                padding: '14px 26px',
+                color: S.textPrimary,
+                background: 'rgba(255,255,255,0.07)',
+                border: `1px solid ${S.borderSubtle}`,
+                backdropFilter: 'blur(8px)',
+              }}
             >
-              <span>See How It Works</span>
+              Explore Portals
+              <ChevronRight style={{ width: 15, height: 15, color: S.textTert }} />
             </a>
           </div>
+        </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            {[
-              { value: '100% Secure', label: 'Tamper-Proof File Vault', icon: Lock },
-              { value: '3-Step Wizard', label: 'Guided Reporting Process', icon: Zap },
-              { value: 'AI Evidence', label: 'Multi-Modal Context Analysis', icon: Sparkles },
-            ].map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className="glass-card p-4 rounded-2xl flex items-center gap-3 text-left">
-                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-400/20 text-cyan-400 shrink-0">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">{stat.value}</p>
-                    <p className="text-xs text-slate-400">{stat.label}</p>
-                  </div>
+        {/* Stats bar — Apple product-page footer row */}
+        <div
+          className="absolute bottom-0 left-0 right-0 flex items-stretch justify-center"
+          style={{
+            borderTop: `1px solid ${S.borderFaint}`,
+            background: 'rgba(0,0,0,0.50)',
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          {stats.map((s, i) => (
+            <div
+              key={s.label}
+              className="flex items-center"
+            >
+              <div className="text-center" style={{ padding: '20px 48px' }}>
+                <div
+                  className="font-semibold"
+                  style={{
+                    fontSize: 'clamp(1.1rem, 2.5vw, 1.6rem)',
+                    color: S.textPrimary,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {s.value}
+                  {s.unit && (
+                    <span style={{ color: S.textSecond }}> {s.unit}</span>
+                  )}
                 </div>
+                <div style={{ fontSize: 12, color: S.textTert, marginTop: 4 }}>
+                  {s.label}
+                </div>
+              </div>
+              {i < stats.length - 1 && (
+                <div
+                  style={{
+                    width: 1,
+                    height: 36,
+                    background: S.borderFaint,
+                    alignSelf: 'center',
+                  }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Portal Cards ─────────────────────────────────────────────────────── */}
+      <section
+        id="portals"
+        style={{ borderTop: `1px solid ${S.borderFaint}` }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-28">
+
+          {/* Section header */}
+          <div className="mb-16 max-w-xl">
+            <p
+              className="mb-3 font-medium uppercase tracking-widest"
+              style={{ fontSize: 11, color: S.textTert, letterSpacing: '0.15em' }}
+            >
+              Access Portals
+            </p>
+            <h2
+              className="font-bold tracking-tight"
+              style={{
+                fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)',
+                color: S.textPrimary,
+                lineHeight: 1.12,
+                letterSpacing: '-0.015em',
+              }}
+            >
+              One system. <br />Three stakeholder views.
+            </h2>
+          </div>
+
+          {/* Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {portals.map(p => {
+              const Icon = p.icon;
+              return (
+                <PortalHoverCard
+                  key={p.role}
+                  role={p.role}
+                  Icon={Icon}
+                  title={p.title}
+                  desc={p.desc}
+                  href={p.href}
+                  cta={p.cta}
+                />
               );
             })}
           </div>
+        </div>
+      </section>
 
-        </section>
+      {/* ── Features ─────────────────────────────────────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${S.borderFaint}` }}>
+        <div className="max-w-6xl mx-auto px-6 py-28">
 
-        {/* ── Feature Cards ── */}
-        <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 py-20 border-t border-slate-800/60">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-              Designed for Maximum Accountability
-            </h2>
-            <p className="text-slate-400 max-w-xl mx-auto text-sm sm:text-base">
-              Transform messy screenshots and bad experiences into structured, legally actionable evidence reports.
+          <div className="mb-16 max-w-xl">
+            <p
+              className="mb-3 font-medium uppercase tracking-widest"
+              style={{ fontSize: 11, color: S.textTert, letterSpacing: '0.15em' }}
+            >
+              Core Architecture
             </p>
+            <h2
+              className="font-bold tracking-tight"
+              style={{
+                fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)',
+                color: S.textPrimary,
+                lineHeight: 1.12,
+                letterSpacing: '-0.015em',
+              }}
+            >
+              Built for accountability. <br />Designed for scale.
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((f) => {
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {features.map(f => {
               const Icon = f.icon;
               return (
-                <div 
+                <div
                   key={f.title}
-                  className="glass-card glass-card-hover p-8 rounded-2xl flex flex-col justify-between relative"
+                  className="rounded-2xl"
+                  style={{
+                    background: S.surfaceCard,
+                    border: `1px solid ${S.borderFaint}`,
+                    padding: '28px',
+                  }}
                 >
-                  {f.badge && (
-                    <span className="absolute top-5 right-5 text-[10px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      {f.badge}
-                    </span>
-                  )}
-                  <div>
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.gradient} border flex items-center justify-center mb-6`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white mb-2.5">{f.title}</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed">{f.description}</p>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-6"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: `1px solid ${S.borderSubtle}`,
+                    }}
+                  >
+                    <Icon style={{ width: 18, height: 18, color: S.textPrimary }} />
                   </div>
+                  <h3
+                    className="font-semibold mb-3"
+                    style={{ fontSize: 16, color: S.textPrimary }}
+                  >
+                    {f.title}
+                  </h3>
+                  <p style={{ fontSize: 13, color: S.textSecond, lineHeight: 1.7 }}>
+                    {f.body}
+                  </p>
                 </div>
               );
             })}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── How It Works ── */}
-        <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 py-20 border-t border-slate-800/60">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">How FairRideAI Works</h2>
-            <p className="text-slate-400 max-w-md mx-auto text-sm sm:text-base">
-              A seamless flow from instant documentation to structured evidence reports.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.num} className="glass-card p-8 rounded-2xl relative flex flex-col items-start">
-                  <div className="flex items-center justify-between w-full mb-6">
-                    <span className="text-3xl font-black text-gradient-cyan">{step.num}</span>
-                    <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300">
-                      <Icon className="w-5 h-5 text-cyan-400" />
-                    </div>
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-2">{step.title}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{step.body}</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ── Final Call to Action ── */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 mb-20">
-          <div className="glass-card rounded-3xl p-10 sm:p-16 text-center relative overflow-hidden glow-blue-lg border-blue-500/30">
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-6">
-                Take Control of Your Commute
-              </h2>
-              <p className="text-slate-300 text-base sm:text-lg mb-8 leading-relaxed">
-                Don&apos;t accept illegal cash extortion or forced cancellations. Document every incident with FairRideAI and demand fair treatment.
-              </p>
-              <Link 
-                href="/register"
-                className="inline-flex items-center gap-2.5 px-9 py-4 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 text-slate-950 font-bold text-base rounded-xl shadow-2xl hover:brightness-110 transition-all active:scale-[0.98]"
-              >
-                <ShieldCheck className="w-5 h-5 text-slate-950" />
-                <span>Create Your Free Account</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-      </main>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* ── Footer ───────────────────────────────────────────────────────────── */}
+      <footer style={{ borderTop: `1px solid ${S.borderFaint}`, background: S.bg }}>
+        <div
+          className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm font-semibold text-slate-300">
-              FairRide<span className="text-cyan-400">AI</span>
+            <Shield style={{ width: 14, height: 14, color: S.textTert }} />
+            <span style={{ fontSize: 12, color: S.textTert }}>
+              FairRideAI · National Ride Protection
             </span>
           </div>
 
-          <p className="text-xs text-slate-500 text-center">
-            © 2026 FairRideAI. Protecting commuters from ride extortion.
+          <p style={{ fontSize: 12, color: S.textTert }}>
+            © 2026 FairRideAI · Consumer Protection Act, 2019
           </p>
 
-          <div className="flex items-center gap-5 text-xs font-medium text-slate-400">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Commuter Login</Link>
-            <Link href="/operator/login" className="text-blue-400 hover:text-blue-300 transition-colors">Operator Portal</Link>
-            <Link href="/government/login" className="text-violet-400 hover:text-violet-300 transition-colors">Govt Portal</Link>
+          <div className="flex items-center gap-6" style={{ fontSize: 12 }}>
+            {[
+              { label: 'Home',       href: '/' },
+              { label: 'Commuter',   href: '/login' },
+              { label: 'Operator',   href: '/operator/login' },
+              { label: 'Government', href: '/government/login' },
+            ].map(l => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="transition-colors hover:text-white"
+                style={{ color: S.textTert }}
+              >
+                {l.label}
+              </Link>
+            ))}
           </div>
         </div>
       </footer>
+
     </div>
   );
 }
